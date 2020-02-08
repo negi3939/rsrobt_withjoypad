@@ -330,7 +330,7 @@ int main()
                         //IKより(目標)各関節角度を求める
                             //[rad]
                             //L1=L2より式を簡略化
-                            th1=atan(Y3/X3) - acos( (Z) / (2*L1*rootZ) );
+                            th1=atan2(Y3,X3) - acos( (Z) / (2*L1*rootZ) );
                             th2=acos( (Z) / (2*L1*rootZ) ) + acos( (Z)/ (2*L2*rootZ) );   
                             th3=psi-th1-th2;
                             
