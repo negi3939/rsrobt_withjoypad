@@ -86,6 +86,7 @@ Rsmotor::Rsmotor(int ff,int jn){
     angle.resize(jointnum);
     invk = new invkSolvenu(jn);
     targetx = VectorXd::Zero(7);
+    invk->setcountlimit(1000);
 }
 
 void Rsmotor::setdhparameter(int ii,double thoff,double aal,double dis,double alp){
@@ -380,10 +381,32 @@ int Rsmotor::move(int SERVO_ID,short sPos, unsigned short sTime){
 }
 
 void Rsmotor::move(Vector3d x){
+    Vector4d qua;
     targetx.block(0,0,3,1) = x;
-    targetx(6) = 1.0d;
+    Matrix4d mattheta = Matrix4d::Identity(4,4);
+    mattheta(0,0) = cos(-M_PI/2.0d);
+    mattheta(0,1) = sin(-M_PI/2.0d);
+    mattheta(1,0) = -sin(-M_PI/2.0d);
+    mattheta(1,1) = cos(-M_PI/2.0d);
+    qua = invk->matrixtoquatanion(mattheta);
+    targetx.block(3,0,3,1) = qua.block(0,0,3,1);
+    targetx(6) = 0.0d*sign(qua(3));
+    double bufang;
     invk->settargetfx(targetx);
     angle = invk->getangle(angle);
+    /*double l1 = 0.093d,l2=0.093d,l3=0.2d;
+    double x3=x(0)-l3*cos(M_PI/2.0d);
+    double y3=x(1)-l3*sin(M_PI/2.0d);
+    double z=(x3*x3)+(y3*y3);
+    double rootZ=sqrt((x(0)*x(0))+(x(1)*x(1)));
+    angle(0)=atan2(y3,x3) - acos( (z) / (2*l1*rootZ) );
+    angle(1)=acos( (z) / (2*l1*rootZ) ) + acos( (z)/ (2.0d*0.93d*rootZ) );   
+    angle(2)=M_PI/2.0d-angle(0)-angle(1);
+    */
+    for(int ii=0;ii<jointnum;ii++){
+        bufang = angle(ii)*180.0d/M_PI*10.0d;
+        move(ii+1,(short)bufang,10);
+    }
 }
 
 void Rsmotor::fileout(){
@@ -416,17 +439,17 @@ int main(){
     //serial_init(fdjoy);
     Vector3d ang;
     Vector3d targx;
-    targx << 0,3d,0.0d,0.0d; 
-    ang << M_PI/2.0d,0.0d,0.0d;
+    targx << 0.2d,0.1d,0.0d; 
+    ang << 0.0d,0.0d,0.0d;
     Rsmotor rsm(fdarm,3);
     rsm.filename << "data/hogeangcur.dat";
-    rsm.setdhparameter(0,0.0d,0.093d,0.0d,M_PI/2.0d);
+    rsm.setdhparameter(0,0.0d,0.093d,0.0d,-M_PI/2.0d);
     rsm.setdhparameter(1,0.0d,0.093d,0.0d,0.0d);
     rsm.setdhparameter(2,0.0d,0.2d,0.0d,0.0d);
     rsm.settorque();
     rsm.setangle(ang);
     while(1){
-        rsm.move(targetx);
+        rsm.move(targx);
         rsm.observe();
         std::cout << " angle 1:" << rsm.getangle(1) << " angle 2:" <<rsm.getangle(2)<< " angle 3:" << rsm.getangle(3) << " currenr 1:" << rsm.getcurrent(1) << " currenr 2:" << rsm.getcurrent(2) << " currenr 3:" << rsm.getcurrent(3) << std::endl;;
         if(kbhit()){break;}   
