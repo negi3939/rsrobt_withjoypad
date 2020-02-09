@@ -412,7 +412,7 @@ void Rsmotor::move(Vector3d x){
     targetx.block(3,0,3,1) = qua.block(0,0,3,1);
     targetx(6) = 1.0d*sign(qua(3));
     double bufang;
-    PRINT_MAT(targetx);
+    //PRINT_MAT(targetx);
     invk->settargetfx(targetx);
     angle = invk->getangle(angle);
     for(int jj=0;jj<jointnum;jj++){
@@ -424,14 +424,14 @@ void Rsmotor::move(Vector3d x){
                 anglewrite(jj) = angle(jj) + 2.0d*M_PI*angledoublepi(jj);
     }
     //angle = anglewrite;
-    std::cout << "x:" << 0.093d*cos(angle(0)-M_PI/2.0d) + 0.093d*cos(angle(0)+angle(1)-M_PI/2.0d) + 0.2d*cos(angle(0)+angle(1)+angle(2)-M_PI/2.0d) << std::endl;
-    std::cout << "y:" << 0.093d*sin(angle(0)-M_PI/2.0d) + 0.093d*sin(angle(0)+angle(1)-M_PI/2.0d) + 0.2d*sin(angle(0)+angle(1)+angle(2)-M_PI/2.0d) << std::endl;
+    //std::cout << "x:" << 0.093d*cos(angle(0)-M_PI/2.0d) + 0.093d*cos(angle(0)+angle(1)-M_PI/2.0d) + 0.2d*cos(angle(0)+angle(1)+angle(2)-M_PI/2.0d) << std::endl;
+    //std::cout << "y:" << 0.093d*sin(angle(0)-M_PI/2.0d) + 0.093d*sin(angle(0)+angle(1)-M_PI/2.0d) + 0.2d*sin(angle(0)+angle(1)+angle(2)-M_PI/2.0d) << std::endl;
     for(int ii=0;ii<jointnum;ii++){
         bufang = (angle(ii))*180.0d/M_PI*10.0d;
-        std::cout << " "<<ii+1 <<":: " << bufang << "->"<< (short)bufang;
+        //std::cout << " "<<ii+1 <<":: " << bufang << "->"<< (short)bufang;
         move(ii+1,(short)bufang,20);
     }
-    std::cout  << std::endl;
+    //std::cout  << std::endl;
 }
 
 void Rsmotor::fileout(){
@@ -458,10 +458,12 @@ Rsmotor::~Rsmotor(){
 
 int main(){
     int fdarm,fdjoy;
+    int ret;
+    struct js_event js;
     fdarm = open(ROBODEV, O_RDWR);
-    //fdjoy = open(JOYDEVNAME, O_RDWR);
+    fdjoy = open(JOYDEVNAME, O_RDWR);
     serial_init(fdarm);
-    //serial_init(fdjoy);
+    serial_init(fdjoy);
     Vector3d ang;
     Vector3d targx;
     targx << 0.3d,0.02d,0.0d; 
@@ -474,11 +476,33 @@ int main(){
     rsm.settorque();
     //rsm.setangle(ang);
     while(1){
-        targx(1) = targx(1) + 0.001d;
+        ret = read(fdjoy, &js, sizeof(js));
+        if (ret != sizeof(js)){
+            std::cout << "ba-ka size is not same" << std::endl;
+        }
+        if(js.number == 1){ //vertical
+            if(js.value == -32767){
+                //std::cout << "up" << std::endl;
+                targx(1) = targx(1)+0.01d;
+            }else if(js.value == 32767){
+                //std::cout << "down" << std::endl;
+                targx(1) = targx(1)-0.01d;
+            }
+        }else if(js.number == 0){ //horizontal
+            if(js.value == 32767){
+                //std::cout << "right" << std::endl;
+                targx(0) = targx(0)+0.01d;
+            }else if(js.value == -32767){
+                 //std::cout << "left" << std::endl;
+                 targx(0) = targx(0)-0.01d;
+            }
+        }
+
         rsm.move(targx);
         rsm.observe();
-        std::cout << " angle 1:" << rsm.getangle(1) << " angle 2:" <<rsm.getangle(2)<< " angle 3:" << rsm.getangle(3) << " currenr 1:" << rsm.getcurrent(1) << " currenr 2:" << rsm.getcurrent(2) << " currenr 3:" << rsm.getcurrent(3) << std::endl;;
+        //std::cout << " angle 1:" << rsm.getangle(1) << " angle 2:" <<rsm.getangle(2)<< " angle 3:" << rsm.getangle(3) << " currenr 1:" << rsm.getcurrent(1) << " currenr 2:" << rsm.getcurrent(2) << " currenr 3:" << rsm.getcurrent(3) << std::endl;;
         if(kbhit()){break;}   
     }
     rsm.unsettorque();
+    close(fdarm);
 }

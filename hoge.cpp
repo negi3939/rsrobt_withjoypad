@@ -38,9 +38,30 @@
 #define JOYDEVNAME "/dev/input/js0"
 
 int main(){
-
+    int ret;
+    struct js_event js;
     int fdjoy = open(JOYDEVNAME, O_RDWR);
     serial_init(fdjoy);
+    while(1){
+        ret = read(fdjoy, &js, sizeof(js));
+        if (ret != sizeof(js)){
+            std::cout << "ba-ka size is not same" << std::endl;
+        }
+        if(js.number == 1){ //vertical
+            if(js.value == -32767){
+                std::cout << "up" << std::endl;
+            }else if(js.value == 32767){
+                std::cout << "down" << std::endl;
+            }
+        }else if(js.number == 0){ //horizontal
+            if(js.value == 32767){
+                std::cout << "right" << std::endl;
+            }else if(js.value == -32767){
+                 std::cout << "left" << std::endl;
+            }
+        }
+    }
+
     /*
     invkSolvenu invk(3);
     invdSolvenu invd(3);
