@@ -19,6 +19,11 @@ ifeq ($(TARGET),arm)
 	SOURCE_SUB = mymath.cpp solvenu.cpp inversekinematics.cpp inversedynamics.cpp
 endif
 
+ifeq ($(TARGET),hoge)
+	SOURCE_MAIN = hoge.cpp
+	SOURCE_SUB = mymath.cpp solvenu.cpp inversekinematics.cpp inversedynamics.cpp
+endif
+
 ifeq ($(TARGET),dataread)
 	SOURCE_MAIN = data_tori.cpp
 endif
