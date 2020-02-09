@@ -16,7 +16,7 @@ endif
 
 ifeq ($(TARGET),arm)
 	SOURCE_MAIN = cuttingArm.cpp
-	SOURCE_SUB = mymath.cpp solvenu.cpp inversekinematics.cpp inversedynamics.cpp Joypadxy.cpp
+	SOURCE_SUB = mymath.cpp solvenu.cpp inversekinematics.cpp inversedynamics.cpp Rsmotor.cpp Joypadxy.cpp
 endif
 
 ifeq ($(TARGET),hoge)
