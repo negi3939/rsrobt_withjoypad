@@ -34,10 +34,13 @@
 #include "solvenu.h"
 #include "inversekinematics.h"
 #include "inversedynamics.h"
+#include "serialsetting.h"
+//#define JOYDEVNAME "/dev/input/js0"
 
 int main(){
+    //int fdjoy = open(JOYDEVNAME, O_RDWR);
     invkSolvenu invk(3);
-    invk.setdhparameter(0,M_PI/2.0d,0.093d,0.0d,0.0d);
+    invk.setdhparameter(0,-M_PI/2.0d,0.093d,0.0d,0.0d);
     invk.setdhparameter(1,0.0d,0.093d,0.0d,0.0d);
     invk.setdhparameter(2,0.0d,0.2d,0.0d,0.0d);
     MatrixXd mattheta;
