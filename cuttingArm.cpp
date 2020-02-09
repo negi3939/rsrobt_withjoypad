@@ -56,6 +56,7 @@ class Rsmotor{
         VectorXd angle;
         VectorXd targetx;
         invkSolvenu *invk;
+        invdSolvenu *invd;
     public:
         Rsmotor(int ff,int jn);
         std::stringstream filename;
@@ -80,23 +81,28 @@ class Rsmotor{
 Rsmotor::Rsmotor(int ff,int jn){
     fd = ff;
     jointnum = jn;
-    datanum = 3*jn+1;
+    datanum = 3*jn+1+6;
     vlength = 0;
     data = new double[datanum];
     angle.resize(jointnum);
     invk = new invkSolvenu(jn);
+    invd = new invdSolvenu(jn);
     targetx = VectorXd::Zero(7);
     invk->setcountlimit(1000);
 }
 
 void Rsmotor::setdhparameter(int ii,double thoff,double aal,double dis,double alp){
     invk->setdhparameter(ii,thoff,aal,dis,alp);
+    invd->copy((*invk));
 }
 
 void Rsmotor::observe(){
     double databuf[datanum];
     short ang[jointnum],speed[jointnum],curr[jointnum];
     short bufang,bufspeed,bufcurr;
+    VectorXd anglev(jointnum);
+    VectorXd ctauv(jointnum);
+    Vector3d forcev,momentv;
     gettimeofday(&end_time, NULL);
 	long seconds = end_time.tv_sec - start_time.tv_sec; //seconds
    	long useconds = end_time.tv_usec - start_time.tv_usec; //milliseconds
@@ -107,7 +113,11 @@ void Rsmotor::observe(){
         ang[ii] = bufang;
         speed[ii] = bufspeed;
         curr[ii] = bufcurr;
+        anglev(ii) = ((double)ang[ii]/10.0d)*M_PI/180.0d;
+        ctauv(ii) = ((double)curr[ii]/1000.0d);
     }
+    invd->calcaA(anglev);
+    invd->calcforce(ctauv,forcev,momentv);
     for(ii=0;ii<jointnum;ii++){
         databuf[ii+1] = (double)ang[ii]/10.0d;
     }
@@ -115,11 +125,18 @@ void Rsmotor::observe(){
         databuf[ii+1+jointnum] = (double)speed[ii];
     }
     for(ii=0;ii<jointnum;ii++){
-        databuf[ii+2+jointnum] = (double)curr[ii]/1000.0d;;
+        databuf[ii+1+2*jointnum] = (double)curr[ii]/1000.0d;
     }
+    for(ii=0;ii<3;ii++){
+        databuf[ii+1+3*jointnum] = forcev(ii);
+        databuf[ii+1+3*jointnum+3] = momentv(ii);
+    }
+    
     for(ii=0;ii<datanum;ii++){
         data[ii] = databuf[ii];
     }
+    
+
     senddatasireis();
 }
 
