@@ -34,6 +34,7 @@
 #include "solvenu.h"
 #include "inversekinematics.h"
 #include "inversedynamics.h"
+#include "Joypadxy.h"
 #include "serialsetting.h"
 
 #define BAUDRATE B115200
@@ -456,24 +457,22 @@ Rsmotor::~Rsmotor(){
     fileout();
 }
 
-class joypadxy{
-    protected:
-        
-    public:
-};
+
 
 
 int main(){
     int fdarm,fdjoy;
     int ret;
-    struct js_event js;
     fdarm = open(ROBODEV, O_RDWR);
     fdjoy = open(JOYDEVNAME, O_RDWR);
     serial_init(fdarm);
     serial_init(fdjoy);
+    Joypadxy jsxy(fdjoy);
     Vector3d ang;
     Vector3d targx;
-    targx << 0.3d,0.02d,0.0d; 
+    targx << 0.3d,0.02d,0.0d;
+    jsxy.setxp(targx(0));
+    jsxy.setyp(targx(1));
     ang << M_PI/2.0d,0.0d,0.0d;
     Rsmotor rsm(fdarm,3);
     rsm.filename << "data/hogeangcur.dat";
@@ -483,28 +482,8 @@ int main(){
     rsm.settorque();
     while(0){rsm.setangle(ang);}
     while(1){
-        ret = read(fdjoy, &js, sizeof(js));
-        if (ret != sizeof(js)){
-            std::cout << "ba-ka size is not same" << std::endl;
-        }
-        if(js.number == 1){ //vertical
-            if(js.value == -32767){
-                //std::cout << "up" << std::endl;
-                targx(1) = targx(1)+0.01d;
-            }else if(js.value == 32767){
-                //std::cout << "down" << std::endl;
-                targx(1) = targx(1)-0.01d;
-            }
-        }else if(js.number == 0){ //horizontal
-            if(js.value == 32767){
-                //std::cout << "right" << std::endl;
-                targx(0) = targx(0)+0.01d;
-            }else if(js.value == -32767){
-                 //std::cout << "left" << std::endl;
-                 targx(0) = targx(0)-0.01d;
-            }else if(js.value ==1){break;}
-        }
-
+        targx(0) = jsxy.getxp();
+        targx(1) = jsxy.getyp();
         rsm.move(targx);
         rsm.observe();
         //std::cout << " angle 1:" << rsm.getangle(1) << " angle 2:" <<rsm.getangle(2)<< " angle 3:" << rsm.getangle(3) << " currenr 1:" << rsm.getcurrent(1) << " currenr 2:" << rsm.getcurrent(2) << " currenr 3:" << rsm.getcurrent(3) << std::endl;;

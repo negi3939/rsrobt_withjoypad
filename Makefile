@@ -16,12 +16,12 @@ endif
 
 ifeq ($(TARGET),arm)
 	SOURCE_MAIN = cuttingArm.cpp
-	SOURCE_SUB = mymath.cpp solvenu.cpp inversekinematics.cpp inversedynamics.cpp
+	SOURCE_SUB = mymath.cpp solvenu.cpp inversekinematics.cpp inversedynamics.cpp Joypadxy.cpp
 endif
 
 ifeq ($(TARGET),hoge)
 	SOURCE_MAIN = hoge.cpp
-	SOURCE_SUB = mymath.cpp solvenu.cpp inversekinematics.cpp inversedynamics.cpp
+	SOURCE_SUB = mymath.cpp Joypadxy.cpp
 endif
 
 ifeq ($(TARGET),dataread)
