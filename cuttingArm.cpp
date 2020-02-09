@@ -72,7 +72,8 @@ int main(){
         rsm.move(targx);
         rsm.observe();
         //std::cout << " angle 1:" << rsm.getangle(1) << " angle 2:" <<rsm.getangle(2)<< " angle 3:" << rsm.getangle(3) << " currenr 1:" << rsm.getcurrent(1) << " currenr 2:" << rsm.getcurrent(2) << " currenr 3:" << rsm.getcurrent(3) << std::endl;;
-        if(kbhit()){break;}   
+        if(kbhit()){break;}
+        if(jsxy.getendflag()){break;}   
     }
     rsm.unsettorque();
     close(fdarm);
