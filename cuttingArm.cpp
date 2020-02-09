@@ -470,11 +470,11 @@ int main(){
     ang << M_PI/2.0d,0.0d,0.0d;
     Rsmotor rsm(fdarm,3);
     rsm.filename << "data/hogeangcur.dat";
-    rsm.setdhparameter(0,-M_PI/2.0d,0.093d,0.0d,0.0d);
-    rsm.setdhparameter(1,0.0d,0.093d,0.0d,0.0d);
-    rsm.setdhparameter(2,0.0d,0.2d,0.0d,0.0d);
+    rsm.setdhparameter(0,-M_PI/2.0d,0.093d,-0.0095d,0.0d);
+    rsm.setdhparameter(1,0.0d,0.093d,-0.0095d,0.0d);
+    rsm.setdhparameter(2,0.0d,0.2d,-0.0095d,0.0d);
     rsm.settorque();
-    //rsm.setangle(ang);
+    while(0){rsm.setangle(ang);}
     while(1){
         ret = read(fdjoy, &js, sizeof(js));
         if (ret != sizeof(js)){
@@ -495,7 +495,7 @@ int main(){
             }else if(js.value == -32767){
                  //std::cout << "left" << std::endl;
                  targx(0) = targx(0)-0.01d;
-            }
+            }else if(js.value ==1){break;}
         }
 
         rsm.move(targx);
