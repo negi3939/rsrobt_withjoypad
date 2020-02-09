@@ -399,6 +399,9 @@ int Rsmotor::move(int SERVO_ID,short sPos, unsigned short sTime){
 
 void Rsmotor::move(Vector3d x){
     Vector4d qua;
+    //VectorXd preangle(jointnum);
+    VectorXd angledoublepi(jointnum);
+    VectorXd anglewrite(jointnum);
     targetx.block(0,0,3,1) = x;
     Matrix4d mattheta = Matrix4d::Identity(4,4);
     mattheta(0,0) = cos(0.0d);
@@ -407,16 +410,28 @@ void Rsmotor::move(Vector3d x){
     mattheta(1,1) = cos(0.0d);
     qua = invk->matrixtoquatanion(mattheta);
     targetx.block(3,0,3,1) = qua.block(0,0,3,1);
-    targetx(6) = 0.0d*sign(qua(3));
+    targetx(6) = 1.0d*sign(qua(3));
     double bufang;
+    PRINT_MAT(targetx);
     invk->settargetfx(targetx);
     angle = invk->getangle(angle);
+    for(int jj=0;jj<jointnum;jj++){
+                if(angle(jj)>1.1d*M_PI){
+                    angledoublepi(jj) -= 1.0d;
+                }else if(angle(jj)<-1.1d*M_PI){
+                    angledoublepi(jj) += 1.0d;
+                }
+                anglewrite(jj) = angle(jj) + 2.0d*M_PI*angledoublepi(jj);
+    }
+    //angle = anglewrite;
     std::cout << "x:" << 0.093d*cos(angle(0)-M_PI/2.0d) + 0.093d*cos(angle(0)+angle(1)-M_PI/2.0d) + 0.2d*cos(angle(0)+angle(1)+angle(2)-M_PI/2.0d) << std::endl;
     std::cout << "y:" << 0.093d*sin(angle(0)-M_PI/2.0d) + 0.093d*sin(angle(0)+angle(1)-M_PI/2.0d) + 0.2d*sin(angle(0)+angle(1)+angle(2)-M_PI/2.0d) << std::endl;
     for(int ii=0;ii<jointnum;ii++){
-        bufang = angle(ii)*180.0d/M_PI*10.0d;
-        move(ii+1,(short)bufang,10);
+        bufang = (angle(ii))*180.0d/M_PI*10.0d;
+        std::cout << " "<<ii+1 <<":: " << bufang << "->"<< (short)bufang;
+        move(ii+1,(short)bufang,20);
     }
+    std::cout  << std::endl;
 }
 
 void Rsmotor::fileout(){
@@ -449,16 +464,17 @@ int main(){
     //serial_init(fdjoy);
     Vector3d ang;
     Vector3d targx;
-    targx << 0.3d,0.1d,0.0d; 
-    ang << 0.0d,0.0d,0.0d;
+    targx << 0.3d,0.02d,0.0d; 
+    ang << M_PI/2.0d,0.0d,0.0d;
     Rsmotor rsm(fdarm,3);
     rsm.filename << "data/hogeangcur.dat";
     rsm.setdhparameter(0,-M_PI/2.0d,0.093d,0.0d,0.0d);
     rsm.setdhparameter(1,0.0d,0.093d,0.0d,0.0d);
     rsm.setdhparameter(2,0.0d,0.2d,0.0d,0.0d);
     rsm.settorque();
-    rsm.setangle(ang);
+    //rsm.setangle(ang);
     while(1){
+        targx(1) = targx(1) + 0.001d;
         rsm.move(targx);
         rsm.observe();
         std::cout << " angle 1:" << rsm.getangle(1) << " angle 2:" <<rsm.getangle(2)<< " angle 3:" << rsm.getangle(3) << " currenr 1:" << rsm.getcurrent(1) << " currenr 2:" << rsm.getcurrent(2) << " currenr 3:" << rsm.getcurrent(3) << std::endl;;

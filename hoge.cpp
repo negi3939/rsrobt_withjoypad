@@ -35,11 +35,13 @@
 #include "inversekinematics.h"
 #include "inversedynamics.h"
 #include "serialsetting.h"
-//#define JOYDEVNAME "/dev/input/js0"
+#define JOYDEVNAME "/dev/input/js0"
 
 int main(){
 
-    //int fdjoy = open(JOYDEVNAME, O_RDWR);
+    int fdjoy = open(JOYDEVNAME, O_RDWR);
+    serial_init(fdjoy);
+    /*
     invkSolvenu invk(3);
     invdSolvenu invd(3);
     invk.setdhparameter(0,-M_PI/2.0d,0.093d,0.0d,0.0d);
@@ -73,4 +75,5 @@ int main(){
     invd.calcforce(tau,force,moment);
     PRINT_MAT(force);
     PRINT_MAT(moment);
+    */
 }
