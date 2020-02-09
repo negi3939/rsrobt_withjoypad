@@ -7,3 +7,5 @@
 *.mat
 *~
 data/*
+Rotating_by_input_jp.cpp
+jptest.cpp
