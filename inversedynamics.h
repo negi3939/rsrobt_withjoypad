@@ -19,6 +19,9 @@ class invdSolvenu : public invkSolvenu {
     VectorXd funcorg(VectorXd x) override;
     void calcaTt();
     void calcjacobi();
+    MatrixXd getjacobi();
+    VectorXd gettau(VectorXd f,VectorXd mom);
+    void calcforce(VectorXd tau,Vector3d &f,Vector3d &mom);
     VectorXd getvel(VectorXd x);
     ~invdSolvenu();
 };

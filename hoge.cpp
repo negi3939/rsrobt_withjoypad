@@ -38,11 +38,14 @@
 //#define JOYDEVNAME "/dev/input/js0"
 
 int main(){
+
     //int fdjoy = open(JOYDEVNAME, O_RDWR);
     invkSolvenu invk(3);
+    invdSolvenu invd(3);
     invk.setdhparameter(0,-M_PI/2.0d,0.093d,0.0d,0.0d);
     invk.setdhparameter(1,0.0d,0.093d,0.0d,0.0d);
     invk.setdhparameter(2,0.0d,0.2d,0.0d,0.0d);
+    invd.copy(invk);
     MatrixXd mattheta;
     mattheta = MatrixXd::Zero(4,4);
     VectorXd qua,targetx,angle;
@@ -63,4 +66,11 @@ int main(){
     PRINT_MAT(angle);
     std::cout << "x:" << 0.093d*cos(angle(0)-M_PI/2.0d) + 0.093d*cos(angle(0)+angle(1)-M_PI/2.0d) + 0.2d*cos(angle(0)+angle(1)+angle(2)-M_PI/2.0d) << std::endl;
     std::cout << "y:" << 0.093d*sin(angle(0)-M_PI/2.0d) + 0.093d*sin(angle(0)+angle(1)-M_PI/2.0d) + 0.2d*sin(angle(0)+angle(1)+angle(2)-M_PI/2.0d) << std::endl;
+    VectorXd tau(3);
+    Vector3d force,moment;
+    tau << 0.3d,-0.2d,0.1d;
+    invd.calcaA(angle);
+    invd.calcforce(tau,force,moment);
+    PRINT_MAT(force);
+    PRINT_MAT(moment);
 }

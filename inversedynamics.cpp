@@ -80,6 +80,35 @@ void invdSolvenu::calcjacobi(){
     }
 }
 
+MatrixXd invdSolvenu::getjacobi(){
+    calcaTt();
+    calcjacobi();
+    return (*jacobi);//動作未確認
+}
+
+VectorXd invdSolvenu::gettau(VectorXd f,VectorXd mom){
+    calcaTt();
+    calcjacobi();
+    VectorXd fm,tau;
+    fm.resize(f.size()+mom.size(),1);
+    fm.block(0,0,f.size(),1) = f;
+    fm.block(f.size(),0,mom.size(),1) = mom;
+    tau = jacobi->transpose()*fm;
+    return tau;//動作未確認
+}
+
+void invdSolvenu::calcforce(VectorXd tau,Vector3d &f,Vector3d &mom){
+    calcaTt();
+    calcjacobi();
+    VectorXd fmom(6);
+    fmom.block(0,0,3,1) = f;
+    fmom.block(3,0,3,1) = mom;
+    JacobiSVD<MatrixXd> svd(jacobi->transpose(),ComputeThinU|ComputeThinV);
+    fmom = svd.solve(tau);
+    f = fmom.block(0,0,3,1);
+    mom = fmom.block(3,0,3,1);//動作未確認
+}
+
 VectorXd invdSolvenu::getvel(VectorXd x){
     VectorXd vel = solve(x);
     return vel;
