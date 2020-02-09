@@ -456,6 +456,13 @@ Rsmotor::~Rsmotor(){
     fileout();
 }
 
+class joypadxy{
+    protected:
+        
+    public:
+};
+
+
 int main(){
     int fdarm,fdjoy;
     int ret;
