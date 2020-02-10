@@ -72,10 +72,13 @@ void Rsmotor::observe(){
         speed[ii] = bufspeed;
         curr[ii] = bufcurr;
         anglev(ii) = ((double)ang[ii]/10.0d)*M_PI/180.0d;
-        ctauv(ii) = 15.3d*((double)curr[ii]/1000.0d);
+        ctauv(ii) = sign(angle(ii)-anglev(ii))*(double)curr[ii]/1000.0d;
+        //std::cout << " ii: " <<ii << "target "<< angle(ii) << " now :"<< anglev(ii) <<  " curr: "<<sign(angle(ii)-anglev(ii))*(double)curr[ii]/1000.0d << std::endl;
     }
+
     invd->calcaA(anglev);
-    invd->calcforce(ctauv,forcev,momentv);
+    invd->calcforce(3.70d*ctauv,forcev,momentv);
+
     for(ii=0;ii<jointnum;ii++){
         databuf[ii+1] = (double)ang[ii]/10.0d;
     }
@@ -83,7 +86,7 @@ void Rsmotor::observe(){
         databuf[ii+1+jointnum] = (double)speed[ii];
     }
     for(ii=0;ii<jointnum;ii++){
-        databuf[ii+1+2*jointnum] = (double)curr[ii]/1000.0d;
+        databuf[ii+1+2*jointnum] = ctauv(ii);
     }
     for(ii=0;ii<3;ii++){
         databuf[ii+1+3*jointnum] = forcev(ii);
