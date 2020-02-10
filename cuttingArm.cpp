@@ -55,9 +55,11 @@ int main(){
     Joypadxy jsxy(fdjoy);
     Vector3d ang;
     Vector3d targx;
+    double theta = 0.0d;
     targx << 0.3d,0.02d,0.0d;
     jsxy.setxp(targx(0));
     jsxy.setyp(targx(1));
+    jsxy.setthp(theta);
     ang << M_PI/2.0d,0.0d,0.0d;
     Rsmotor rsm(fdarm,3);
     rsm.filename << "data/hogeangcur.dat";
@@ -69,7 +71,8 @@ int main(){
     while(1){
         targx(0) = jsxy.getxp();
         targx(1) = jsxy.getyp();
-        rsm.move(targx);
+        theta = jsxy.getthp();
+        rsm.move(targx,theta);
         rsm.observe();
         //std::cout << " angle 1:" << rsm.getangle(1) << " angle 2:" <<rsm.getangle(2)<< " angle 3:" << rsm.getangle(3) << " currenr 1:" << rsm.getcurrent(1) << " currenr 2:" << rsm.getcurrent(2) << " currenr 3:" << rsm.getcurrent(3) << std::endl;;
         if(kbhit()){break;}

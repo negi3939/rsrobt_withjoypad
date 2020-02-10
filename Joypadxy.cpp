@@ -82,8 +82,8 @@ void Joypadxy::joypadread(){
             }else if(js.value ==1){break;}
         }else if(js.number == 6){
             if(js.value == 1){
-                thl = thl + cc;
-                //std::cout << "CW" << std::endl;
+                thl = thl - cc;
+                //std::cout << "CCW" << std::endl;
             }
         }
         else if(js.number == 7){

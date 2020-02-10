@@ -39,7 +39,7 @@
 Rsmotor::Rsmotor(int ff,int jn){
     fd = ff;
     jointnum = jn;
-    datanum = 3*jn+1+6;
+    datanum = 3*jn+1+6+7;
     vlength = 0;
     data = new double[datanum];
     angle.resize(jointnum);
@@ -89,7 +89,10 @@ void Rsmotor::observe(){
         databuf[ii+1+3*jointnum] = forcev(ii);
         databuf[ii+1+3*jointnum+3] = momentv(ii);
     }
-    
+    for(ii=0;ii<7;ii++){
+        databuf[ii+1+3*jointnum+6] = targetx(ii);
+    }
+
     for(ii=0;ii<datanum;ii++){
         data[ii] = databuf[ii];
     }
