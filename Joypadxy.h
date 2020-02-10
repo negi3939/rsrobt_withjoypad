@@ -12,16 +12,18 @@ class Joypadxy{
     protected:
         int fd;
         int endflag;
-        double cc,xp,yp;
+        double cc,xp,yp,thp;
         void joypadread();
     public:
         Joypadxy(int ff);
         void setunitcom(double cc);
         void setxp(double x);
         void setyp(double y);
+        void setthp(double theta);
         double getunitcom();
         double getxp();
         double getyp();
+        double getthp();
         int getendflag();
 };
 

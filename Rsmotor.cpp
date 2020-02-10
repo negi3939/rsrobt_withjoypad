@@ -72,7 +72,7 @@ void Rsmotor::observe(){
         speed[ii] = bufspeed;
         curr[ii] = bufcurr;
         anglev(ii) = ((double)ang[ii]/10.0d)*M_PI/180.0d;
-        ctauv(ii) = ((double)curr[ii]/1000.0d);
+        ctauv(ii) = 15.3d*((double)curr[ii]/1000.0d);
     }
     invd->calcaA(anglev);
     invd->calcforce(ctauv,forcev,momentv);
@@ -270,6 +270,7 @@ void Rsmotor::getall(int ID,short &ang,short &speed,short &current){
     sendbuf[7] = sum;
     tcflush(fd, TCIFLUSH);
     ret = write(fd, &sendbuf, 8);
+    usleep(50000);
     memset(readbuf, 0x00, sizeof(readbuf));
     readlen = 27;
     len = 0;
@@ -391,6 +392,40 @@ void Rsmotor::move(Vector3d x){
     }
     //std::cout  << std::endl;
 }
+
+void Rsmotor::move(Vector3d x,double theta){
+    Vector4d qua;
+    //VectorXd preangle(jointnum);
+    VectorXd angledoublepi(jointnum);
+    VectorXd anglewrite(jointnum);
+    targetx.block(0,0,3,1) = x;
+    Matrix4d mattheta = Matrix4d::Identity(4,4);
+    mattheta(0,0) = cos(theta);
+    mattheta(0,1) = sin(theta);
+    mattheta(1,0) = -sin(theta);
+    mattheta(1,1) = cos(theta);
+    qua = invk->matrixtoquatanion(mattheta);
+    targetx.block(3,0,3,1) = qua.block(0,0,3,1);
+    targetx(6) = 1.0d*sign(qua(3));
+    double bufang;
+    //PRINT_MAT(targetx);
+    invk->settargetfx(targetx);
+    angle = invk->getangle(angle);
+    for(int jj=0;jj<jointnum;jj++){
+                if(angle(jj)>1.1d*M_PI){
+                    angledoublepi(jj) -= 1.0d;
+                }else if(angle(jj)<-1.1d*M_PI){
+                    angledoublepi(jj) += 1.0d;
+                }
+                anglewrite(jj) = angle(jj) + 2.0d*M_PI*angledoublepi(jj);
+    }
+     for(int ii=0;ii<jointnum;ii++){
+        bufang = (angle(ii))*180.0d/M_PI*10.0d;
+        move(ii+1,(short)bufang,20);
+    }
+    //std::cout  << std::endl;
+}
+
 
 void Rsmotor::fileout(){
     int ii,jj;

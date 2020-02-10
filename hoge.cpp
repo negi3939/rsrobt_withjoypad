@@ -43,6 +43,7 @@ int main(){
     int ret;
     int fdjoy = open(JOYDEVNAME, O_RDWR);
     serial_init(fdjoy);
+    /*
     Vector3d targx;
     targx << 0.3d,0.02d,0.0d; 
     Joypadxy jsxy(fdjoy);
@@ -55,4 +56,14 @@ int main(){
         usleep(10000);
         if(jsxy.getendflag()){break;}
     }
+    */
+
+   struct js_event js;
+   while(1){
+       ret = read(fdjoy, &js, sizeof(js));
+        if (ret != sizeof(js)){
+            std::cout << "ba-ka size is not same" << std::endl;
+        }
+        std::cout << " jsnumber: " << (int) js.number << " jsval: " << js.value << std::endl;
+   }
 }

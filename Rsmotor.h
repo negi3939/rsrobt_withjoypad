@@ -33,6 +33,7 @@ class Rsmotor{
         int unsettorque();
         int move(int SERVO_ID,short sPos, unsigned short sTime);
         void move(Vector3d x);
+        void move(Vector3d x,double theta);
         void fileout();
         ~Rsmotor();
 };

@@ -45,17 +45,19 @@ Joypadxy::Joypadxy(int ff){
 void Joypadxy::setunitcom(double c){cc = c;}
 void Joypadxy::setxp(double x){xp = x;}
 void Joypadxy::setyp(double y){yp = y;}
+void Joypadxy::setthp(double theta){thp = theta;}
 double Joypadxy::getunitcom(){return cc;}
 double Joypadxy::getxp(){return xp;}
 double Joypadxy::getyp(){return yp;}
-
+double Joypadxy::getthp(){return thp;}
 void Joypadxy::joypadread(){
     int ret;
     struct js_event js;
-    double xl,yl;
+    double xl,yl,thl;
     pthread_mutex_lock(&readtex);
     xl = xp;
     yl = yp;
+    thl = thp;
     pthread_mutex_unlock(&readtex);
     while(1){
         ret = read(fd, &js, sizeof(js));
@@ -78,10 +80,22 @@ void Joypadxy::joypadread(){
                 xl = xl - cc;
                 //std::cout << "left" << std::endl;
             }else if(js.value ==1){break;}
+        }else if(js.number == 6){
+            if(js.value == 1){
+                thl = thl + cc;
+                //std::cout << "CW" << std::endl;
+            }
+        }
+        else if(js.number == 7){
+            if(js.value == 1){
+                thl = thl + cc;
+                //std::cout << "CW" << std::endl;
+            }
         }
         pthread_mutex_lock(&readtex);
         xp = xl;
         yp = yl;
+        thp = thl;
         pthread_mutex_unlock(&readtex);
     }
     pthread_mutex_lock(&breaktex);
