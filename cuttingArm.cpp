@@ -45,9 +45,41 @@
 #define BYTE unsigned char
 
 
-int main(){
+int main(int ac,char *av[]){
+    std::vector<double> timef,xf,yf,thetaf;
+    if(ac>1){
+        std::ifstream ifs(av[1]);
+        if (!ifs){
+            std::cout << "cannot read file" << std::endl; //エラー
+        }
+        std::string line;
+        for( int row = 0;getline(ifs, line);++row ) { // 1行読んで
+            std::istringstream stream(line);
+            double data;
+            for(int col = 0; stream >> data; ++col) { // 1個ずつ切り分ける
+                switch (col){
+                    case 0:
+                        timef.push_back(data);
+                        break; 
+                    case 4:
+                        xf.push_back(data);
+                        break;
+                    case 5:
+                        yf.push_back(data);
+                        break;
+                    case 6:
+                        thetaf.push_back(data);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+        ifs.close();
+    }
+    
     int fdarm,fdjoy;
-    int ret;
+    int ret,numstep=0;
     fdarm = open(ROBODEV, O_RDWR);
     fdjoy = open(JOYDEVNAME, O_RDWR);
     serial_init(fdarm);
@@ -67,11 +99,26 @@ int main(){
     rsm.setdhparameter(1,0.0d,0.093d,-0.0095d,0.0d);
     rsm.setdhparameter(2,0.0d,0.2d,-0.0095d,0.0d);
     rsm.settorque();
+    if(ac>1){
+        targx(0) = xf[numstep];
+        targx(1) = yf[numstep];
+        theta = thetaf[numstep];
+        rsm.move(targx,theta);
+        sleep(3);
+    }
     while(0){rsm.setangle(ang);}
     while(1){
-        targx(0) = jsxy.getxp();
-        targx(1) = jsxy.getyp();
-        theta = jsxy.getthp();
+        if(ac>1){
+            targx(0) = xf[numstep];
+            targx(1) = yf[numstep];
+            theta = thetaf[numstep];
+            sleep(1);
+            numstep++;
+        }else{
+            targx(0) = jsxy.getxp();
+            targx(1) = jsxy.getyp();
+            theta = jsxy.getthp();
+        }
         rsm.move(targx,theta);
         rsm.observe();
         //std::cout << " angle 1:" << rsm.getangle(1) << " angle 2:" <<rsm.getangle(2)<< " angle 3:" << rsm.getangle(3) << " currenr 1:" << rsm.getcurrent(1) << " currenr 2:" << rsm.getcurrent(2) << " currenr 3:" << rsm.getcurrent(3) << std::endl;;
